@@ -1,0 +1,288 @@
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --background-color: #f8f9fa;
+    --text-color: #333;
+    --card-bg: #ffffff;
+    --card-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    --border-radius: 8px;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.hidden {
+    display: none !important;
+}
+
+
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+#category-nav {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.category-link {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border: none;
+    font-size: 1rem;
+}
+
+.category-link:hover, .category-link.active {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+main {
+    padding: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.controls-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.search-container {
+    flex-grow: 1;
+}
+
+#search-box {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    box-sizing: border-box;
+}
+
+.publish-button-container {
+    display: flex;
+    justify-content: center;
+}
+
+.發佈btn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.發佈btn:hover {
+    background-color: #0056b3;
+}
+
+.task-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.task-item {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s;
+}
+
+.task-item:hover {
+    transform: translateY(-5px);
+}
+
+.task-header {
+    margin-bottom: 1rem;
+}
+
+.task-item h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.task-category {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    align-self: flex-start;
+}
+
+.task-item .task-description {
+    margin: 0 0 1rem 0;
+    flex-grow: 1;
+}
+
+.task-footer {
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.task-footer .task-date {
+    white-space: nowrap;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #aaa;
+}
+
+#publish-form .form-group {
+    margin-bottom: 1rem;
+}
+
+#publish-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+#publish-form input,
+#publish-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+#publish-form .submit-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#publish-form .submit-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+    .controls-container {
+        flex-direction: row;
+        align-items: center;
+    }
+    .publish-button-container {
+        justify-content: flex-start;
+        /* Aligns button to the left part of its container */
+        width: 50%; 
+    }
+    .發佈btn {
+        width: auto;
+    }
+}
+
+
+/* VIP 标识样式 */
+.vip-badge {
+    margin-left: 10px;
+    padding: 2px 8px;
+    background-color: #FFD700;
+    color: #333;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+/* VIP有效期样式 */
+.vip-expiry {
+    margin: 5px 0;
+    padding: 2px 0;
+    color: #666;
+    font-style: italic;
+}
+
+/* VIP标识样式（之前已添加） */
+.vip-badge {
+    margin-left: 10px;
+    padding: 2px 8px;
+    background-color: #FFD700;
+    color: #333;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.hidden {
+    display: none !important;
+}

@@ -1,0 +1,179 @@
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>需求發佈平台</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script type="module" src="login.js"></script>
+    <script src="https://cdn.staticfile.net/translate.js/3.1.7/translate.js"></script>
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://64071181.github.io/mokJsapi/a.js">//琪琪修改</script>
+
+
+
+
+
+</head>
+<body>
+    <p id="translate"></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <header>
+        <h1>需求發佈平台</h1>
+        <nav id="category-nav">
+            <!-- 類別將動態插入此處 -->
+        </nav>
+    </header>
+
+
+
+        
+
+        <div class="admin-panel hidden task-item" > 
+            <!-- Google 登入後 admin 功能 -->
+                <a href="u.html" target="_blank"><h3>admin 功能</h3></a>
+        </div>
+
+
+        <div class="user-info hidden task-item" ><!-- Google 登入後 一般會員 功能 -->
+                <div class="task-header">
+                    <span id="vip-badge" class="vip-badge task-category hidden">⭐ VIP </span>
+
+                </div>
+                <!-- VIP有效期显示 -->
+                <div id="vip-expiry" class="vip-expiry hidden text-sm text-gray-600"></div>
+
+                <div id="login-history" class="history-container" style="display: none;"></div>
+
+
+                <h3 title="悠的點數">💰 = <span class="user-score">0</span></h3>
+                <div class="task-footer">
+                    <span class="user-email"></span>
+                    <button class="task-date 發佈btn" onclick="logout()">登出</button>
+                </div>
+                <div id="success-message" class="success"></div>
+                <div id="db-error-message" class="error"></div>
+        </div>
+
+
+
+
+
+
+
+
+    <main>
+        <div class="controls-container">
+            <div class="search-container">
+                <input type="text" id="search-box" placeholder="按關鍵字搜尋...">
+            </div>
+
+            <div id="login-form" class="publish-button-container">
+                <!-- Google 登入鍵 登入後隱藏 -->
+                <button onclick="loginWithGoogle()" class="發佈btn" >Google 登入</button>
+                <div id="error-message" class="error"></div>
+            </div>
+
+            <div class="publish-button-container user-info hidden">
+                <button id="show-publish-modal-btn" class="發佈btn">發佈新需求</button>
+            </div>
+
+
+
+        </div>
+
+        <div id="task-list" class="task-list-container">
+            <!-- 任務項目將動態插入此處 -->
+        </div>
+    </main>
+
+
+
+
+    <!-- Modal for publishing a new task -->
+    <div id="publish-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button class="close-btn" id="close-modal-btn">&times;</button>
+            <h2>發佈新需求</h2>
+            <form id="publish-form">
+                <div class="form-group">
+                    <label for="form-category">類別</label>
+                    <input type="text" id="form-category" list="category-list" required placeholder="例如：設計、開發、翻譯">
+                    <datalist id="category-list">
+                        <!-- Existing categories will be populated here -->
+                    </datalist>
+                </div>
+                <div class="form-group">
+                    <label for="form-title">標題</label>
+                    <input type="text" id="form-title" required placeholder="請輸入需求的標題">
+                </div>
+                <div class="form-group">
+                    <label for="form-description">描述</label>
+                    <textarea id="form-description" rows="5" required placeholder="請詳細描述您的需求內容"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="form-date">發佈日期</label>
+                    <input type="date" id="form-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="form-contact">聯絡方法</label>
+                    <input type="text" id="form-contact" required placeholder="請輸入 Email 或電話">
+                </div>
+                <button type="submit" class="submit-btn">確認發佈</button>
+            </form>
+        </div>
+    </div>
+
+
+
+    <div id="ContactAKI" class="ContactAKI"><!-- JS _顯示聯莫 --></div>
+    <div class="copyright">
+        <p class="mokJsApi_copyright">版權</p>
+    </div>
+    <div class="scroll-top" id="scrollTop" onclick="scrollToTop()">↑</div>
+
+
+    <script src="script.js"></script>
+    <script>
+
+        translate.service.use('client.edge'); //設置機器翻譯服務通道，直接客戶端本身，不依賴服務端 。相關說明參考 http://translate.zvo.cn/43086.html
+        translate.execute();//進行翻譯 
+
+
+        function Start() {
+            // 顯示聯莫
+            const 聯莫 = ['moksurky@gmail.com','https://wa.me/85264071181/','https://i.meee.com.tw/atcX6QM.png','https://www.instagram.com/moksurky2025/','https://line.me/ti/p/UlSPd7p9zh/','https://www.facebook.com/aki.mok.10/','http://t.me/mokaki/','https://github.com/GoldComeHK/GoldComeHK.github.io'
+            ];
+            _顯示聯莫(聯莫);
+        }
+        琪琪修改('https://64071181.github.io/')
+
+
+
+
+    </script>
+</body>
+</html>
