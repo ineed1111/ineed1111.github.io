@@ -308,19 +308,34 @@ function updateVIPDisplay(vipResult = null) {
 
 
 
-    // 加載任務列表（實時更新）
-    function loadTasks() {
-        if (!db) return;
+    // 無限滾動分批加載需求
+    let allTasks = [];
+    let loadedCount = 0;
+    const PAGE_SIZE = 10; // 每次加載數量
+    let isLoading = false;
+    let unsubscribeTasks = null;
 
+    function loadTasksInit() {
+        if (!db) return;
+        if (unsubscribeTasks) unsubscribeTasks();
+        isLoading = false;
         const tasksRef = collection(db, 'tasks');
-        onSnapshot(tasksRef, 
+        unsubscribeTasks = onSnapshot(tasksRef, 
             (snapshot) => {
-                const tasks = snapshot.docs.map(doc => ({
+                isLoading = false;
+                allTasks = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
-                }));
-                renderTasks(tasks);
-                renderCategories(tasks);
+                })).sort((a, b) => {
+                    // 日期格式 yyyy-mm-dd，直接字串比較即可
+                    if (!a.publishDate) return 1;
+                    if (!b.publishDate) return -1;
+                    return b.publishDate.localeCompare(a.publishDate);
+                });
+                loadedCount = 0;
+                clearTasks();
+                loadMoreTasks();
+                renderCategories(allTasks);
             },
             (error) => {
                 console.error('任務數據監聽錯誤:', error);
@@ -329,6 +344,118 @@ function updateVIPDisplay(vipResult = null) {
                 }
             }
         );
+    }
+
+    function clearTasks() {
+        const container = document.getElementById('task-list');
+        if (container) container.innerHTML = '';
+    }
+
+    function loadMoreTasks() {
+        if (isLoading) return;
+        isLoading = true;
+        const container = document.getElementById('task-list');
+        if (!container) return;
+
+        // 應用過濾
+        const filteredTasks = allTasks.filter(task => {
+            const categoryMatch = currentFilter.category === 'All' || task.category === currentFilter.category;
+            const keywordMatch = task.title.toLowerCase().includes(currentFilter.keyword.toLowerCase()) ||
+                               task.description.toLowerCase().includes(currentFilter.keyword.toLowerCase());
+            return categoryMatch && keywordMatch;
+        });
+
+        if (loadedCount === 0 && filteredTasks.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 py-4 text-center">沒有找到符合條件的需求</p>';
+            isLoading = false;
+            return;
+        }
+
+        const nextTasks = filteredTasks.slice(loadedCount, loadedCount + PAGE_SIZE);
+        nextTasks.forEach(task => {
+            const taskElement = createTaskElement(task);
+            container.appendChild(taskElement);
+        });
+        loadedCount += nextTasks.length;
+        isLoading = false;
+    }
+
+    // 滾動監聽
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY || window.pageYOffset;
+        const viewportHeight = window.innerHeight;
+        const fullHeight = document.body.scrollHeight;
+        if (fullHeight - (scrollY + viewportHeight) < 200) {
+            // 距底部 200px 內自動加載
+            loadMoreTasks();
+        }
+    });
+
+    // 搜尋/分類切換時重載
+    function reloadTasksOnFilter() {
+        loadedCount = 0;
+        clearTasks();
+        loadMoreTasks();
+    }
+
+    // 將原本的 renderTasks 拆分為 createTaskElement
+    function createTaskElement(task) {
+        const taskElement = document.createElement('div');
+        taskElement.className = 'task-item bg-white rounded-lg shadow-md p-4 mb-4 transition-all duration-300 hover:shadow-lg';
+
+        // 聯繫方式（修改部分）
+        let contactHtml;
+        if (!currentUser) {
+            contactHtml = `
+                <div class="task-contact mt-2 p-2 bg-gray-50 rounded">
+                    <button onclick="loginWithGoogle()" class="發佈btn">登入查看聯絡方式</button>
+                </div>
+            `;
+        } else if (isCurrentUserAdmin || isCurrentUserVIP) {
+            const isUrl = /^https?:\/\/.+/.test(task.contact.trim());
+            const contactContent = isUrl 
+                ? `<a href="${task.contact}" target="_blank" class="text-blue-600 hover:underline">聯絡客戶</a>`
+                : task.contact;
+            contactHtml = `
+                <div class="task-contact mt-2 p-2 bg-gray-50 rounded">
+                    <strong>聯繫方式:</strong> ${contactContent}
+                </div>
+            `;
+        } else {
+            contactHtml = `
+                <div class="task-contact mt-2 p-2 bg-gray-50 rounded">
+                    <button onclick="充值()" class="發佈btn">成為VIP獲取聯絡方式</button>
+                </div>
+            `;
+        }
+
+        const canModify = currentUser && (currentUser.uid === task.userId || isCurrentUserAdmin);
+        const actionButtonsHtml = canModify ? `
+            <div class="task-actions flex gap-2 mt-3">
+                <button class="發佈btn"
+                        onclick="editTask('${task.id}', ${JSON.stringify(task).replace(/"/g, '&quot;')})">
+                    編輯
+                </button>
+                <button class="發佈btn" style="background-color: #f87171;"
+                        onclick="deleteTask('${task.id}', '${task.userId}')">
+                    刪除
+                </button>
+            </div>
+        ` : '';
+
+        taskElement.innerHTML = `
+            <div class="task-header flex justify-between items-start">
+                <span class="發佈btn">${task.category}</span>
+            </div>
+            <h3 class="task-title text-xl font-semibold mt-2 mb-1">${task.title}</h3>
+            <p class="task-description text-gray-700">${task.description}</p>
+            <div class="task-footer text-sm text-gray-500 mt-2">
+                <span>發佈於: ${task.publishDate}</span>
+            </div>
+            ${contactHtml}
+            ${actionButtonsHtml}
+        `;
+        return taskElement;
     }
 
     // 處理表單提交（統一處理發佈和編輯）
@@ -442,97 +569,7 @@ function updateVIPDisplay(vipResult = null) {
         if (modalTitle) modalTitle.textContent = '發佈新需求';
     }
 
-    // 渲染任務列表
-    function renderTasks(tasks) {
-        const container = document.getElementById('task-list');
-        if (!container) return;
-
-        container.innerHTML = '';
-
-        if (!tasks.length) {
-            container.innerHTML = '<p class="text-gray-500 py-4 text-center">暫無需求，請發佈第一個需求吧！</p>';
-            return;
-        }
-
-        // 應用過濾
-        const filteredTasks = tasks.filter(task => {
-            const categoryMatch = currentFilter.category === 'All' || task.category === currentFilter.category;
-            const keywordMatch = task.title.toLowerCase().includes(currentFilter.keyword.toLowerCase()) ||
-                               task.description.toLowerCase().includes(currentFilter.keyword.toLowerCase());
-            return categoryMatch && keywordMatch;
-        });
-
-        if (filteredTasks.length === 0) {
-            container.innerHTML = '<p class="text-gray-500 py-4 text-center">沒有找到符合條件的需求</p>';
-            return;
-        }
-
-        // 渲染每個任務
-        filteredTasks.forEach(task => {
-            const taskElement = document.createElement('div');
-            taskElement.className = 'task-item bg-white rounded-lg shadow-md p-4 mb-4 transition-all duration-300 hover:shadow-lg';
-
-            // 聯繫方式（修改部分）
-            let contactHtml;
-            if (!currentUser) {
-                // 未登錄用戶：顯示登錄按鈕
-                contactHtml = `
-                    <div class="task-contact mt-2 p-2 bg-gray-50 rounded">
-                        <button onclick="loginWithGoogle()" class="發佈btn">登入查看聯絡方式</button>
-                    </div>
-                `;
-            } else if (isCurrentUserAdmin || isCurrentUserVIP) {
-                // 管理員或VIP用戶：顯示聯繫方式
-                const isUrl = /^https?:\/\/.+/.test(task.contact.trim());
-                const contactContent = isUrl 
-                    ? `<a href="${task.contact}" target="_blank" class="text-blue-600 hover:underline">聯絡客戶</a>`
-                    : task.contact;
-                
-                contactHtml = `
-                    <div class="task-contact mt-2 p-2 bg-gray-50 rounded">
-                        <strong>聯繫方式:</strong> ${contactContent}
-                    </div>
-                `;
-            } else {
-                // 普通登錄用戶：顯示充值按鈕
-                contactHtml = `
-                    <div class="task-contact mt-2 p-2 bg-gray-50 rounded">
-                        <button onclick="充值()" class="發佈btn">成為VIP獲取聯絡方式</button>
-                    </div>
-                `;
-            }
-
-            // 操作按鈕（僅發佈者或管理員可見）
-            const canModify = currentUser && (currentUser.uid === task.userId || isCurrentUserAdmin);
-            const actionButtonsHtml = canModify ? `
-                <div class="task-actions flex gap-2 mt-3">
-                    <button class="發佈btn"
-                            onclick="editTask('${task.id}', ${JSON.stringify(task).replace(/"/g, '&quot;')})">
-                        編輯
-                    </button>
-                    <button class="發佈btn" style="background-color: #f87171;"
-                            onclick="deleteTask('${task.id}', '${task.userId}')">
-                        刪除
-                    </button>
-                </div>
-            ` : '';
-
-            taskElement.innerHTML = `
-                <div class="task-header flex justify-between items-start">
-                    <span class="發佈btn">${task.category}</span>
-                </div>
-                <h3 class="task-title text-xl font-semibold mt-2 mb-1">${task.title}</h3>
-                <p class="task-description text-gray-700">${task.description}</p>
-                <div class="task-footer text-sm text-gray-500 mt-2">
-                    <span>發佈於: ${task.publishDate}</span>
-                </div>
-                ${contactHtml}
-                ${actionButtonsHtml}
-            `;
-
-            container.appendChild(taskElement);
-        });
-    }
+    // ...已改為 createTaskElement, loadMoreTasks, clearTasks, reloadTasksOnFilter...
 
     // 渲染分類導航
     function renderCategories(tasks) {
@@ -608,7 +645,7 @@ function updateVIPDisplay(vipResult = null) {
     if (searchBox) {
         searchBox.addEventListener('input', () => {
             currentFilter.keyword = searchBox.value;
-            loadTasks();
+            reloadTasksOnFilter();
         });
     }
 
@@ -650,7 +687,7 @@ function updateVIPDisplay(vipResult = null) {
     window.editTask = editTask;
 
     // 初始化加載
-    loadTasks();
+    loadTasksInit();
 });
 
 
