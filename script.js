@@ -622,7 +622,7 @@ function updateVIPDisplay(vipResult = null) {
 
             link.addEventListener('click', () => {
                 currentFilter.category = category;
-                loadTasks();
+                reloadTasksOnFilter();
             });
 
             categoryNav.appendChild(link);
