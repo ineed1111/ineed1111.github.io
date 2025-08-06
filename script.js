@@ -1,3 +1,37 @@
+// 類別導航欄展開/收合功能
+document.addEventListener('DOMContentLoaded', function() {
+  const nav = document.getElementById('category-nav');
+  const btn = document.getElementById('expand-category-btn');
+  if (!nav || !btn) return;
+
+  function checkOverflow() {
+    // 內容超過 max-height 才顯示展開按鈕
+    if (nav.scrollHeight > nav.offsetHeight) {
+      btn.style.display = 'block';
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
+  btn.addEventListener('click', function() {
+    if (nav.classList.contains('category-nav-collapsed')) {
+      nav.classList.remove('category-nav-collapsed');
+      nav.classList.add('category-nav-expanded');
+      btn.textContent = '收合類別';
+    } else {
+      nav.classList.remove('category-nav-expanded');
+      nav.classList.add('category-nav-collapsed');
+      btn.textContent = '顯示全部類別';
+    }
+  });
+
+  // 初始檢查
+  setTimeout(checkOverflow, 300);
+
+  // 監聽類別動態插入（MutationObserver）
+  const observer = new MutationObserver(checkOverflow);
+  observer.observe(nav, { childList: true, subtree: true });
+});
 document.addEventListener('DOMContentLoaded', async () => {
     // 等待 Firebase 加載完成
     await waitForFirebase();
