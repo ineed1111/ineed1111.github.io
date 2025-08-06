@@ -159,7 +159,10 @@ auth.onAuthStateChanged(async (user) => {
         vipUnsubscribe = onSnapshot(vipDocRef, async (doc) => {
             const vipResult = await checkIfVIP(currentUser.uid);
             isCurrentUserVIP = vipResult.isVIP;
+            vipEndDate = vipResult.endDate;
+            vipIsTrial = vipResult.isTrial;
             updateVIPDisplay(vipResult);
+            reloadTasksOnFilter(); // VIP狀態變動時刷新任務列表
         });
 
     } else {
@@ -173,7 +176,7 @@ auth.onAuthStateChanged(async (user) => {
         showModalBtn?.style.setProperty('display', 'none');
         loginPrompt?.style.setProperty('display', 'block');
     }
-    loadTasks();
+    reloadTasksOnFilter();
 });
 
 // 更新VIP標識和有效期顯示
