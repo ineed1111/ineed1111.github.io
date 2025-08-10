@@ -1,3 +1,20 @@
+// 統計總會員數並顯示到管理員界面
+async function updateTotalUserCount() {
+    try {
+        const usersRef = collection(db, "users");
+        const snapshot = await getDocs(usersRef);
+        const total = snapshot.size;
+        const countSpan = document.getElementById("total-user-count");
+        if (countSpan) countSpan.textContent = total;
+    } catch (e) {
+        console.error("獲取會員數失敗", e);
+    }
+}
+
+// 管理員面板載入時自動更新會員數
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(updateTotalUserCount, 1200); // 等待 firebase 初始化
+});
 
 // 需求網 https://www.doubao.com/thread/w392c0a67fbaabef1
 
