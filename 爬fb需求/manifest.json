@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "自動抓取FB貼文",
+  "version": "1.0",
+  "icons": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+  },
+  "description": "自動抓取 Facebook 社團搜尋頁面貼文內容並顯示於 console\n!!!BUG--20250810爬fb需求-頁中沒帖不去下頁",
+  "permissions": [
+    "scripting",
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.facebook.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "自動抓取FB貼文"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.facebook.com/*"
+      ],
+      "js": ["content.js"]
+    }
+  ]
+}
